@@ -25,10 +25,10 @@ module.exports = merge(common, {
         enforce: 'pre',
         exclude: /node_modules/,
         use: {
-          loader: 'tslint-loader',
+          loader: 'eslint-loader',
           options: {
-            emitErrors: true,
-            typeCheck: false,
+            emitError: true,
+            emitWarning: true,
           }
         }
       },
