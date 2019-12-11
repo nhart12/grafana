@@ -2,7 +2,7 @@ import { resultsToDataFrames, grafanaDataFrameToArrowTable, arrowTableToDataFram
 import { toDataFrameDTO, toDataFrame } from './processDataFrame';
 import { FieldType } from '../types';
 
-/* tslint:disable */
+/* eslint-disable */
 const resp = {
   results: {
     '': {
@@ -17,7 +17,7 @@ const resp = {
     },
   },
 };
-/* tslint:enable */
+/* eslint-enable */
 
 describe('GEL Utils', () => {
   test('should parse output with dataframe', () => {
