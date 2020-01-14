@@ -1,7 +1,6 @@
 package cloudwatch
 
 import (
-	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -17,9 +16,8 @@ type cloudWatchQuery struct {
 	Expression              string
 	ReturnData              bool
 	Dimensions              map[string][]string
-	UsedPeriod              int
+	Period                  int
 	RequestedPeriod         int
-	AutoPeriod              bool
 	Alias                   string
 	MatchExact              bool
 	UsedExpression          string
@@ -64,25 +62,34 @@ func (q *cloudWatchQuery) isMetricStat() bool {
 	return !q.isSearchExpression() && !q.isMathExpression()
 }
 
-func (q *cloudWatchQuery) setUsedPeriod(startTime time.Time, endTime time.Time, batchContainsWildcard bool, noOfQueries int) {
+func (q *cloudWatchQuery) setPeriod(startTime time.Time, endTime time.Time, batchContainsWildcard bool, noOfQueries int) {
 	if q.RequestedPeriod == 0 {
+		delta := endTime.Sub(startTime)
 		if batchContainsWildcard {
-			q.UsedPeriod = 60
+			if math.Ceil(delta.Hours()) <= 24*15 {
+				// until 15 days
+				if q.Namespace == "AWS/EC2" {
+					q.Period = 300
+				} else {
+					q.Period = 60
+				}
+			} else if math.Ceil(delta.Hours()) <= 24*63 {
+				// until 63 days
+				q.Period = 300
+			} else {
+				// more than 63 days
+				q.Period = 3600
+			}
 		} else {
-			delta := endTime.Sub(startTime)
 			hours := math.Ceil(delta.Hours())
-			ms := delta.Milliseconds()
 			datapointsPerSecond := 90000
 			if hours <= 3 {
 				datapointsPerSecond = 180000
 			}
-			test := math.Ceil(float64(delta.Milliseconds()) / 1000.0 / 60.0 / datapointsPerSecond / noOfQueries)
-			q.UsedPeriod = int(test * 60)
-			fmt.Println(hours)
-			// q.UsedPeriod, _ = int()
-
+			q.Period = int(math.Ceil(float64(delta.Milliseconds()/1000/60)/(float64(datapointsPerSecond)/float64(noOfQueries))) * 60)
 		}
 	} else {
-		q.UsedPeriod = q.RequestedPeriod
+		// period that was specified in the query editor is being used
+		q.Period = q.RequestedPeriod
 	}
 }

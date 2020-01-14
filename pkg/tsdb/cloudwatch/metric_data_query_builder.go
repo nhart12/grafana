@@ -28,7 +28,7 @@ func (e *CloudWatchExecutor) buildMetricDataQuery(query *cloudWatchQuery) (*clou
 					MetricName: aws.String(query.MetricName),
 					Dimensions: make([]*cloudwatch.Dimension, 0),
 				},
-				Period: aws.Int64(int64(query.UsedPeriod)),
+				Period: aws.Int64(int64(query.Period)),
 			}
 			for key, values := range query.Dimensions {
 				mdq.MetricStat.Metric.Dimensions = append(mdq.MetricStat.Metric.Dimensions,
@@ -94,12 +94,12 @@ func buildSearchExpression(query *cloudWatchQuery, stat string) string {
 			schema += fmt.Sprintf(",%s", join(dimensionNames, ",", "", ""))
 		}
 
-		return fmt.Sprintf("REMOVE_EMPTY(SEARCH('{%s} %s', '%s', %s))", schema, searchTerm, stat, strconv.Itoa(query.UsedPeriod))
+		return fmt.Sprintf("REMOVE_EMPTY(SEARCH('{%s} %s', '%s', %s))", schema, searchTerm, stat, strconv.Itoa(query.Period))
 	}
 
 	sort.Strings(dimensionNamesWithoutKnownValues)
 	searchTerm = appendSearch(searchTerm, join(dimensionNamesWithoutKnownValues, " ", `"`, `"`))
-	return fmt.Sprintf(`REMOVE_EMPTY(SEARCH('Namespace="%s" %s', '%s', %s))`, query.Namespace, searchTerm, stat, strconv.Itoa(query.UsedPeriod))
+	return fmt.Sprintf(`REMOVE_EMPTY(SEARCH('Namespace="%s" %s', '%s', %s))`, query.Namespace, searchTerm, stat, strconv.Itoa(query.Period))
 }
 
 func escapeDoubleQuotes(arr []string) []string {

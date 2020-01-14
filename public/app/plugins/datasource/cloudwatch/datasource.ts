@@ -1,3 +1,4 @@
+import { PerformanceBackend } from './../../../core/services/echo/backends/PerformanceBackend';
 import React from 'react';
 import angular from 'angular';
 import _ from 'lodash';
@@ -64,10 +65,6 @@ export default class CloudWatchDatasource extends DataSourceApi<CloudWatchQuery,
 
   query(options: DataQueryRequest<CloudWatchQuery>) {
     options = angular.copy(options);
-    const noOfQueries = options.targets.reduce(
-      (total, { hide, statistics }) => (hide ? total : total + statistics.length),
-      0
-    );
 
     const queries = _.filter(options.targets, item => {
       return (
@@ -81,7 +78,7 @@ export default class CloudWatchDatasource extends DataSourceApi<CloudWatchQuery,
       item.metricName = this.replace(item.metricName, options.scopedVars, true, 'metric name');
       item.dimensions = this.convertDimensionFormat(item.dimensions, options.scopedVars);
       item.statistics = item.statistics.map(stat => this.replace(stat, options.scopedVars, true, 'statistics'));
-      item.period = String(this.getPeriod(item, options, noOfQueries)); // use string format for period in graph query, and alerting
+      item.period = String(this.getPeriod(item, options)); // use string format for period in graph query, and alerting
       item.id = this.templateSrv.replace(item.id, options.scopedVars);
       item.expression = this.templateSrv.replace(item.expression, options.scopedVars);
 
@@ -129,39 +126,29 @@ export default class CloudWatchDatasource extends DataSourceApi<CloudWatchQuery,
     return this.templateSrv.variables.map(v => `$${v.name}`);
   }
 
-  getPeriod(target: any, options: any, noOfQueries?: number) {
-    return 0;
-    // const start = this.convertToCloudWatchTime(options.range.from, false);
-    // const end = this.convertToCloudWatchTime(options.range.to, true);
-    // const rangeInMinutes = (end - start) / 60;
+  getPeriod(target: any, options: any) {
+    let period = this.templateSrv.replace(target.period, options.scopedVars);
+    if (target.period && target.period.toLowerCase() !== 'auto') {
+      if (/^\d+$/.test(period)) {
+        period = parseInt(period, 10);
+      } else {
+        period = kbn.interval_to_seconds(period);
+      }
 
-    // let period;
-    // if (!target.period || target.period === 'auto') {
-    //   const now = Math.round(Date.now() / 1000);
-    //   const hours = (now - start) / 60 / 60;
-    //   const datapointsPerSecond = hours <= 3 ? 180000 : 90000;
-    //   period = Math.ceil(rangeInMinutes / (datapointsPerSecond / noOfQueries)) * 60;
-    // } else {
-    //   period = this.templateSrv.replace(target.period, options.scopedVars);
-    //   if (/^\d+$/.test(period)) {
-    //     period = parseInt(period, 10);
-    //   } else {
-    //     period = kbn.interval_to_seconds(period);
-    //   }
-    // }
-    // if (period < 1) {
-    //   period = 1;
-    // }
+      if (period < 1) {
+        period = 1;
+      }
+    }
 
-    // return period;
+    return period;
   }
 
   buildCloudwatchConsoleUrl(
-    { region, namespace, metricName, dimensions, statistics, period, expression }: CloudWatchQuery,
+    { region, namespace, metricName, dimensions, statistics, expression }: CloudWatchQuery,
     start: string,
     end: string,
     title: string,
-    gmdMeta: Array<{ Expression: string }>
+    gmdMeta: Array<{ Expression: string; Period: string }>
   ) {
     region = this.getActualRegion(region);
     let conf = {
@@ -195,7 +182,7 @@ export default class CloudWatchDatasource extends DataSourceApi<CloudWatchQuery,
             ...Object.entries(dimensions).reduce((acc, [key, value]) => [...acc, key, value[0]], []),
             {
               stat,
-              period,
+              period: gmdMeta.length ? gmdMeta[0].Period : 60,
             },
           ]),
         ],

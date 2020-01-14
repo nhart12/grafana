@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -62,15 +63,10 @@ func parseRequestQuery(model *simplejson.Json, refId string) (*requestQuery, err
 		return nil, err
 	}
 
-	p := model.Get("period").MustString("")
-	// autoPeriod := p == "" || strings.ToLower(p) == "auto"
-	// if p == "" {
-	// 	if namespace == "AWS/EC2" {
-	// 		p = "300"
-	// 	} else {
-	// 		p = "60"
-	// 	}
-	// }
+	p := model.Get("period").MustString("0")
+	if strings.ToLower(p) == "auto" || p == "" {
+		p = "0"
+	}
 
 	var period int
 	if regexp.MustCompile(`^\d+$`).Match([]byte(p)) {

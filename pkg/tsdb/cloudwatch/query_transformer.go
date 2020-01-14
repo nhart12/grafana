@@ -35,7 +35,6 @@ func (e *CloudWatchExecutor) transformRequestQueriesToCloudWatchQueries(startTim
 				MetricName:      requestQuery.MetricName,
 				Dimensions:      requestQuery.Dimensions,
 				Stats:           *stat,
-				AutoPeriod:      requestQuery.AutoPeriod,
 				RequestedPeriod: requestQuery.Period,
 				Alias:           requestQuery.Alias,
 				Expression:      requestQuery.Expression,
@@ -55,7 +54,7 @@ func (e *CloudWatchExecutor) transformRequestQueriesToCloudWatchQueries(startTim
 
 	noOfQueries := len(cloudwatchQueries)
 	for _, query := range cloudwatchQueries {
-		query.setUsedPeriod(startTime, endTime, batchContainsWildcard, noOfQueries)
+		query.setPeriod(startTime, endTime, batchContainsWildcard, noOfQueries)
 	}
 
 	return cloudwatchQueries, nil
