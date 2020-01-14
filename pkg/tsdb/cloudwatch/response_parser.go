@@ -48,6 +48,7 @@ func (e *CloudWatchExecutor) parseResponse(metricDataOutputs []*cloudwatch.GetMe
 		}
 
 		response.series = series
+		response.Period = queries[id].UsedPeriod
 		response.Expression = queries[id].UsedExpression
 		response.RefId = queries[id].RefId
 		response.Id = queries[id].Id
@@ -93,7 +94,7 @@ func parseGetMetricDataTimeSeries(metricDataResults map[string]*cloudwatch.Metri
 
 		for j, t := range metricDataResult.Timestamps {
 			if j > 0 {
-				expectedTimestamp := metricDataResult.Timestamps[j-1].Add(time.Duration(query.Period) * time.Second)
+				expectedTimestamp := metricDataResult.Timestamps[j-1].Add(time.Duration(query.UsedPeriod) * time.Second)
 				if expectedTimestamp.Before(*t) {
 					series.Points = append(series.Points, tsdb.NewTimePoint(null.FloatFromPtr(nil), float64(expectedTimestamp.Unix()*1000)))
 				}
@@ -109,7 +110,7 @@ func formatAlias(query *cloudWatchQuery, stat string, dimensions map[string]stri
 	region := query.Region
 	namespace := query.Namespace
 	metricName := query.MetricName
-	period := strconv.Itoa(query.Period)
+	period := strconv.Itoa(query.UsedPeriod)
 
 	if query.isUserDefinedSearchExpression() {
 		pIndex := strings.LastIndex(query.Expression, ",")

@@ -26,6 +26,7 @@ type requestQuery struct {
 	Dimensions         map[string][]string
 	ExtendedStatistics []*string
 	Period             int
+	AutoPeriod         bool
 	Alias              string
 	MatchExact         bool
 }
@@ -36,6 +37,7 @@ type cloudwatchResponse struct {
 	RefId                   string
 	Expression              string
 	RequestExceededMaxLimit bool
+	Period                  int
 }
 
 type queryError struct {

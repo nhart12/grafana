@@ -130,29 +130,30 @@ export default class CloudWatchDatasource extends DataSourceApi<CloudWatchQuery,
   }
 
   getPeriod(target: any, options: any, noOfQueries?: number) {
-    const start = this.convertToCloudWatchTime(options.range.from, false);
-    const end = this.convertToCloudWatchTime(options.range.to, true);
-    const rangeInMinutes = (end - start) / 60;
+    return 0;
+    // const start = this.convertToCloudWatchTime(options.range.from, false);
+    // const end = this.convertToCloudWatchTime(options.range.to, true);
+    // const rangeInMinutes = (end - start) / 60;
 
-    let period;
-    if (!target.period || target.period === 'auto') {
-      const now = Math.round(Date.now() / 1000);
-      const hours = (now - start) / 60 / 60;
-      const datapointsPerSecond = hours <= 3 ? 180000 : 90000;
-      period = Math.ceil(rangeInMinutes / (datapointsPerSecond / noOfQueries)) * 60;
-    } else {
-      period = this.templateSrv.replace(target.period, options.scopedVars);
-      if (/^\d+$/.test(period)) {
-        period = parseInt(period, 10);
-      } else {
-        period = kbn.interval_to_seconds(period);
-      }
-    }
-    if (period < 1) {
-      period = 1;
-    }
+    // let period;
+    // if (!target.period || target.period === 'auto') {
+    //   const now = Math.round(Date.now() / 1000);
+    //   const hours = (now - start) / 60 / 60;
+    //   const datapointsPerSecond = hours <= 3 ? 180000 : 90000;
+    //   period = Math.ceil(rangeInMinutes / (datapointsPerSecond / noOfQueries)) * 60;
+    // } else {
+    //   period = this.templateSrv.replace(target.period, options.scopedVars);
+    //   if (/^\d+$/.test(period)) {
+    //     period = parseInt(period, 10);
+    //   } else {
+    //     period = kbn.interval_to_seconds(period);
+    //   }
+    // }
+    // if (period < 1) {
+    //   period = 1;
+    // }
 
-    return period;
+    // return period;
   }
 
   buildCloudwatchConsoleUrl(

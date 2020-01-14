@@ -63,13 +63,14 @@ func parseRequestQuery(model *simplejson.Json, refId string) (*requestQuery, err
 	}
 
 	p := model.Get("period").MustString("")
-	if p == "" {
-		if namespace == "AWS/EC2" {
-			p = "300"
-		} else {
-			p = "60"
-		}
-	}
+	// autoPeriod := p == "" || strings.ToLower(p) == "auto"
+	// if p == "" {
+	// 	if namespace == "AWS/EC2" {
+	// 		p = "300"
+	// 	} else {
+	// 		p = "60"
+	// 	}
+	// }
 
 	var period int
 	if regexp.MustCompile(`^\d+$`).Match([]byte(p)) {
@@ -107,6 +108,7 @@ func parseRequestQuery(model *simplejson.Json, refId string) (*requestQuery, err
 		Dimensions: dimensions,
 		Statistics: aws.StringSlice(statistics),
 		Period:     period,
+		// AutoPeriod: autoPeriod,
 		Alias:      alias,
 		Id:         id,
 		Expression: expression,

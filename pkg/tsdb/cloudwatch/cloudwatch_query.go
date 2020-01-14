@@ -1,7 +1,10 @@
 package cloudwatch
 
 import (
+	"fmt"
+	"math"
 	"strings"
+	"time"
 )
 
 type cloudWatchQuery struct {
@@ -14,7 +17,9 @@ type cloudWatchQuery struct {
 	Expression              string
 	ReturnData              bool
 	Dimensions              map[string][]string
-	Period                  int
+	UsedPeriod              int
+	RequestedPeriod         int
+	AutoPeriod              bool
 	Alias                   string
 	MatchExact              bool
 	UsedExpression          string
@@ -57,4 +62,27 @@ func (q *cloudWatchQuery) isInferredSearchExpression() bool {
 
 func (q *cloudWatchQuery) isMetricStat() bool {
 	return !q.isSearchExpression() && !q.isMathExpression()
+}
+
+func (q *cloudWatchQuery) setUsedPeriod(startTime time.Time, endTime time.Time, batchContainsWildcard bool, noOfQueries int) {
+	if q.RequestedPeriod == 0 {
+		if batchContainsWildcard {
+			q.UsedPeriod = 60
+		} else {
+			delta := endTime.Sub(startTime)
+			hours := math.Ceil(delta.Hours())
+			ms := delta.Milliseconds()
+			datapointsPerSecond := 90000
+			if hours <= 3 {
+				datapointsPerSecond = 180000
+			}
+			test := math.Ceil(float64(delta.Milliseconds()) / 1000.0 / 60.0 / datapointsPerSecond / noOfQueries)
+			q.UsedPeriod = int(test * 60)
+			fmt.Println(hours)
+			// q.UsedPeriod, _ = int()
+
+		}
+	} else {
+		q.UsedPeriod = q.RequestedPeriod
+	}
 }
