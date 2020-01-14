@@ -16,7 +16,6 @@ import { CoreEvents, StoreState } from 'app/types/';
 
 // Services & utils
 import appEvents from 'app/core/app_events';
-import { getBackendSrv } from 'app/core/services/backend_srv';
 
 // Actions
 import {
@@ -77,15 +76,14 @@ export class DataSourcesListPage extends PureComponent<Props> {
       yesText: 'Delete',
       icon: 'fa-trash',
       onConfirm: () => {
-        this.confirmDeleteDataSource(id);
+        this.confirmDelete(id);
       },
     });
   };
 
-  confirmDeleteDataSource = async (id: number) => {
-    await getBackendSrv()
-      .delete(`/api/datasources/${id}`)
-      .then(() => this.fetchDataSources());
+  confirmDelete = (id: number) => {
+    this.props.deleteDataSource(id);
+    this.fetchDataSources();
   };
 
   render() {
