@@ -9,7 +9,7 @@ export const flattenGroupItems = (groupedItems: CompletionItemGroup[]): Completi
       kind: CompletionItemKind.GroupTitle,
     };
     return all.concat(titleItem, current.items);
-  }, new Array<CompletionItem>());
+  }, []);
 };
 
 export const calculateLongestLabel = (allItems: CompletionItem[]): string => {
