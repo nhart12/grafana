@@ -118,8 +118,6 @@ export interface GrafanaTheme extends GrafanaThemeCommons {
     scrollbar: string;
     scrollbar2: string;
     pageHeader: string;
-    panelEditorVizItem: string;
-    panelEditorVizItemHover: string;
   };
   colors: {
     black: string;
@@ -243,11 +241,6 @@ export interface GrafanaTheme extends GrafanaThemeCommons {
     formCheckboxBgChecked: string;
     formCheckboxBgCheckedHover: string;
     formCheckboxCheckmark: string;
-
-    primary: string;
-    primaryHover: string;
-    primaryBorder: string;
-    primaryBorderHover: string;
   };
   shadow: {
     pageHeader: string;
