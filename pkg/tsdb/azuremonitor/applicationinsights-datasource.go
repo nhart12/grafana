@@ -20,6 +20,7 @@ import (
 	"path"
 	"strings"
 	"time"
+	"strconv"
 )
 
 // ApplicationInsightsDatasource calls the application insights query API's
@@ -552,6 +553,8 @@ func getFloat(in interface{}) (float64, error) {
 		return float64(out), nil
 	} else if out, ok := in.(json.Number); ok {
 		return out.Float64()
+	} else if out, ok := in.(string); ok{
+		return strconv.ParseFloat(out, 64)	
 	} else if out, ok := in.(int64); ok {
 		return float64(out), nil
 	} else if out, ok := in.(float64); ok {
@@ -565,8 +568,8 @@ func getFloat(in interface{}) (float64, error) {
 // Alias patterns like {{resourcename}} are replaced with the appropriate data values.
 func formatApplicationInsightsLegendKey(alias string, metricName string, dimensionName string, dimensionValue string) string {
 	if alias == "" {
-		if len(dimensionName) > 0 {
-			return fmt.Sprintf("{%s=%s}.%s", dimensionName, dimensionValue, metricName)
+		if len(dimensionValue) > 0 {
+			return dimensionValue
 		}
 		return metricName
 	}
