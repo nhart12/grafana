@@ -116,13 +116,13 @@ export class DataSourceSettingsPage extends PureComponent<Props, State> {
       yesText: 'Delete',
       icon: 'fa-trash',
       onConfirm: () => {
-        this.confirmDelete();
+        this.confirmDelete(this.props.dataSource.id);
       },
     });
   };
 
-  confirmDelete = () => {
-    this.props.deleteDataSource();
+  confirmDelete = (id: number) => {
+    this.props.deleteDataSource(id);
   };
 
   onModelChange = (dataSource: DataSourceSettings) => {
